@@ -21,6 +21,7 @@ except ImportError:
 st.set_page_config(
     layout="wide",
     page_title="Chatbot Assistant",
+    page_icon=":robot_face:",
     initial_sidebar_state="collapsed" # Keep sidebar open initially
 )
 
@@ -32,7 +33,7 @@ if 'gemini_api_configured' not in st.session_state:
     try:
         GEMINI_API_KEY = st.secrets["GEMINI_API_KEY"]
         genai.configure(api_key=GEMINI_API_KEY)
-        model = genai.GenerativeModel('gemini-2.5-pro-exp-03-25')
+        model = genai.GenerativeModel('gemini-2.5-pro-preview-03-25')
         # Perform a quick test if possible, or assume configured if no exception
         st.session_state.gemini_api_configured = True
         st.session_state.model = model # Store model in session state
@@ -282,14 +283,24 @@ def get_combined_context():
     return context.strip()
 
 
+# --- Import Tab Modules ---
+from document_comparison import compare_documents, extract_text_from_uploaded_file
+from citation_generator import citation_generator_tab
+from deadline_tracker import deadline_tracker_tab
+from advanced_search import advanced_search_tab
+
 # --- Create Tabs (Reordered) ---
 tab_titles = [
     "📄 Upload Files",      # Stays 1st
     "💬 General Chat",      # Was 4th, now 2nd
     "🔎 Case Law Search",  # Was 2nd, now 3rd
-    "📜 Legal Provisions"   # Was 3rd, now 4th
+    "📜 Legal Provisions",  # Was 3rd, now 4th
+    "📊 Document Comparison", # New feature
+    "📚 Citation Generator", # New feature
+    "📅 Deadline Tracker", # New feature
+    "🔍 Advanced Search"   # New feature
 ]
-tab1, tab2, tab3, tab4 = st.tabs(tab_titles) # Variables now map to the new order
+tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8 = st.tabs(tab_titles) # Variables now map to the new order
 
 # --- Tab 1: Upload Files (Content remains the same) ---
 with tab1:
@@ -508,3 +519,69 @@ with tab4: # This now holds the Legal Provision Lookup content
         with st.container(border=True):
             st.write_stream(st.session_state.provision_search_result_stream)
         st.session_state.provision_search_result_stream = None
+
+
+# --- Tab 5: Document Comparison ---
+with tab5:
+    st.header("📊 Document Comparison")
+    st.info("Compare two legal documents and see the differences highlighted.", icon="💡")
+    
+    # File upload section
+    col1, col2 = st.columns(2)
+    with col1:
+        st.subheader("Document 1")
+        file1 = st.file_uploader("Upload first document", key="doc_compare_file1", 
+                               type=["txt", "pdf", "docx"], help="Upload the first document for comparison")
+    
+    with col2:
+        st.subheader("Document 2")
+        file2 = st.file_uploader("Upload second document", key="doc_compare_file2", 
+                               type=["txt", "pdf", "docx"], help="Upload the second document for comparison")
+    
+    # Comparison options
+    comparison_type = st.radio(
+        "Comparison Type",
+        options=["Line by Line", "Word by Word"],
+        index=0,
+        horizontal=True,
+        help="Select how to compare the documents"
+    )
+    
+    compare_button = st.button(
+        "Compare Documents", 
+        key="compare_docs_button",
+        use_container_width=True,
+        disabled=(file1 is None or file2 is None)
+    )
+    
+    # Perform comparison when button is clicked
+    if compare_button and file1 and file2:
+        with st.spinner("Comparing documents..."):
+            # Extract text from uploaded files
+            text1 = extract_text_from_uploaded_file(file1)
+            text2 = extract_text_from_uploaded_file(file2)
+            
+            # Determine comparison type
+            comp_type = "line" if comparison_type == "Line by Line" else "word"
+            
+            # Compare documents
+            comparison_result = compare_documents(text1, text2, comp_type)
+            
+            # Display results
+            st.subheader("Comparison Results")
+            st.markdown(comparison_result, unsafe_allow_html=True)
+
+
+# --- Tab 6: Citation Generator ---
+with tab6:
+    citation_generator_tab()
+
+
+# --- Tab 7: Deadline Tracker ---
+with tab7:
+    deadline_tracker_tab()
+
+
+# --- Tab 8: Advanced Search ---
+with tab8:
+    advanced_search_tab()
