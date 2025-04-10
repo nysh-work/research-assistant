@@ -11,8 +11,8 @@ import os
 
 def deadline_tracker_tab():
     """Render the deadline tracker tab in the Streamlit app."""
-    st.header("📅 Legal Deadline Tracker")
-    st.info("Track important legal deadlines, court dates, and compliance timelines.", icon="💡")
+    st.header("📅 Hearing Deadline Tracker")
+    st.info("Track important consulting deadlines, hearing dates, and compliance timelines.", icon="💡")
     
     # Initialize session state for deadlines if not already done
     if 'deadlines' not in st.session_state:
@@ -133,7 +133,7 @@ def deadline_tracker_tab():
             )
             deadline_category = st.selectbox(
                 "Category",
-                options=["Court Filing", "Client Meeting", "Document Submission", "Hearing", "Compliance", "Other"],
+                options=["Department Filing", "Client Meeting", "Document Submission", "Hearing", "Compliance", "Other"],
                 index=0,
                 help="Select a category for this deadline."
             )
