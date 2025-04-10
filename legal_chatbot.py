@@ -21,7 +21,7 @@ except ImportError:
 st.set_page_config(
     layout="wide",
     page_title="Chatbot Assistant",
-    page_icon=":robot_face:",
+    page_icon="🤖",
     initial_sidebar_state="collapsed" # Keep sidebar open initially
 )
 
